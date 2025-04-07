@@ -7,6 +7,7 @@ import {
     Modal,
     Button
 } from 'react-native';
+import * as Animatable from 'react-native-animatable';
 import { postComment } from '../features/comments/commentsSlice';
 import { useSelector, useDispatch } from 'react-redux';
 import { Rating, Input } from 'react-native-elements';
@@ -68,7 +69,7 @@ const CampsiteInfoScreen = ({ route }) => {
                 keyExtractor={(item) => item.id.toString()}
                 contentContainerStyle={{ marginHorizontal: 20, paddingVertical: 20 }}
                 ListHeaderComponent={
-                    <>
+                    <Animatable.View animation='fadeInUp' duration={2000} delay={1000}>
                         <RenderCampsite
                             campsite={campsite}
                             isFavorite={favorites.includes(campsite.id)}
@@ -76,8 +77,8 @@ const CampsiteInfoScreen = ({ route }) => {
                             onShowModal={() => setShowModal(!showModal)}
                         />
                         <Text style={styles.commentsTitle}>Comments</Text>
-                    </>
-                }
+                    </Animatable.View>
+                }                
             />
 
             <Modal

@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Card, Icon } from 'react-native-elements';
 import { baseUrl } from '../../shared/baseUrl';
+import * as Animatable from 'react-native-animatable';
 
 const RenderCampsite = (props) => {
     const { campsite } = props;
@@ -9,39 +10,46 @@ const RenderCampsite = (props) => {
     if (!campsite) {
         return <View />;
     }
-
+    
     return (
-        <Card containerStyle={styles.cardContainer}>
-            <Card.Image source={{ uri: baseUrl + campsite.image }}>
-                <View style={{ padding: 10 }}>
-                    <Text style={styles.cardText}>{campsite.name}</Text>
-                    <Text style={{ marginTop: 10 }}>{campsite.description}</Text>
+        <Animatable.View
+            animation='fadeInDownBig'
+            duration={2000}
+            delay={1000}
+        >
+            <Card containerStyle={styles.cardContainer}>
+                <Card.Image source={{ uri: baseUrl + campsite.image }}>
+                    <View style={{ padding: 10 }}>
+                        <Text style={styles.cardText}>{campsite.name}</Text>
+                        <Text style={{ marginTop: 10 }}>{campsite.description}</Text>
+                    </View>
+                </Card.Image>
+                <View style={styles.cardRow}>
+                    <Icon
+                        name={props.isFavorite ? 'heart' : 'heart-o'}
+                        type='font-awesome'
+                        color='#f50'
+                        raised
+                        reverse
+                        onPress={() =>
+                            props.isFavorite
+                                ? console.log('Already set as a favorite')
+                                : props.markFavorite()
+                        }
+                    />
+                    <Icon
+                        name='pencil'
+                        type='font-awesome'
+                        color='#5637DD'
+                        raised
+                        reverse
+                        onPress={() => props.onShowModal()}
+                    />
                 </View>
-            </Card.Image>
-            <View style={styles.cardRow}>
-                <Icon
-                    name={props.isFavorite ? 'heart' : 'heart-o'}
-                    type="font-awesome"
-                    color="#f50"
-                    raised
-                    reverse
-                    onPress={() =>
-                        props.isFavorite
-                            ? console.log('Already set as a favorite')
-                            : props.markFavorite()
-                    }
-                />
-                <Icon
-                    name="pencil"
-                    type="font-awesome"
-                    color="#5637DD"
-                    raised
-                    reverse
-                    onPress={() => props.onShowModal()} 
-                />
-            </View>
-        </Card>
+            </Card>
+        </Animatable.View>
     );
+    
 };
 
 const styles = StyleSheet.create({
