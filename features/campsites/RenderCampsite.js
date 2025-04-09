@@ -1,27 +1,62 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { StyleSheet, View, Text, Alert, PanResponder } from 'react-native';
 import { Card, Icon } from 'react-native-elements';
-import { baseUrl } from '../../shared/baseUrl';
 import * as Animatable from 'react-native-animatable';
+import { baseUrl } from '../../shared/baseUrl';
 
 const RenderCampsite = (props) => {
     const { campsite } = props;
 
+    const isLeftSwipe = ({ dx }) => dx < -200;
+
+    const panResponder = PanResponder.create({
+        onStartShouldSetPanResponder: () => true,
+        onPanResponderEnd: (e, gestureState) => {
+            console.log(gestureState);
+            if (isLeftSwipe(gestureState)) {
+                Alert.alert(
+                    'Add Favorite',
+                    'Are you sure you wish to add ' +
+                        campsite.name +
+                        ' to favorites?',
+                    [
+                        {
+                            text: 'Cancel',
+                            style: 'cancel',
+                            onPress: () => console.log('Cancel Pressed')
+                        },
+                        {
+                            text: 'OK',
+                            onPress: () =>
+                                props.isFavorite
+                                    ? console.log('Already set as a favorite')
+                                    : props.markFavorite()
+                        }
+                    ],
+                    { cancelable: false }
+                );
+            }
+        }
+    });
+
     if (!campsite) {
         return <View />;
     }
-    
+
     return (
         <Animatable.View
-            animation='fadeInDownBig'
+            animation='fadeInDown'
             duration={2000}
             delay={1000}
+            {...panResponder.panHandlers}
         >
             <Card containerStyle={styles.cardContainer}>
                 <Card.Image source={{ uri: baseUrl + campsite.image }}>
                     <View style={{ padding: 10 }}>
                         <Text style={styles.cardText}>{campsite.name}</Text>
-                        <Text style={{ marginTop: 10 }}>{campsite.description}</Text>
+                        <Text style={{ marginTop: 10 }}>
+                            {campsite.description}
+                        </Text>
                     </View>
                 </Card.Image>
                 <View style={styles.cardRow}>
@@ -49,7 +84,6 @@ const RenderCampsite = (props) => {
             </Card>
         </Animatable.View>
     );
-    
 };
 
 const styles = StyleSheet.create({
