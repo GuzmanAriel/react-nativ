@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { StyleSheet, View, Text, Alert, PanResponder } from 'react-native';
 import { Card, Icon } from 'react-native-elements';
 import * as Animatable from 'react-native-animatable';
@@ -7,10 +7,19 @@ import { baseUrl } from '../../shared/baseUrl';
 const RenderCampsite = (props) => {
     const { campsite } = props;
 
+    const view = useRef();
+
     const isLeftSwipe = ({ dx }) => dx < -200;
 
     const panResponder = PanResponder.create({
         onStartShouldSetPanResponder: () => true,
+        onPanResponderGrant: () => {
+            view.current
+                .rubberBand(1000)
+                .then((endState) =>
+                    console.log(endState.finished ? 'finished' : 'canceled')
+                );
+        },
         onPanResponderEnd: (e, gestureState) => {
             console.log(gestureState);
             if (isLeftSwipe(gestureState)) {
@@ -45,6 +54,7 @@ const RenderCampsite = (props) => {
 
     return (
         <Animatable.View
+            ref={view}
             animation='fadeInDown'
             duration={2000}
             delay={1000}
