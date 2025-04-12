@@ -13,7 +13,6 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Rating, Input } from 'react-native-elements';
 import { toggleFavorite } from '../features/favorites/favoritesSlice';
 import RenderCampsite from '../features/campsites/RenderCampsite';
-import Icon from 'react-native-vector-icons/FontAwesome';
 
 const CampsiteInfoScreen = ({ route }) => {
     const { campsite } = route.params;
