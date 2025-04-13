@@ -6,7 +6,6 @@ import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList } from '
 import { Icon } from 'react-native-elements';
 import logo from '../assets/images/logo.png';
 
-
 import HomeScreen from './HomeScreen';
 import DirectoryScreen from './DirectoryScreen';
 import CampsiteInfoScreen from './CampsiteInfoScreen';
@@ -14,8 +13,7 @@ import AboutScreen from './AboutScreen';
 import ContactScreen from './ContactScreen';
 import ReservationScreen from './ReservationScreen';
 import FavoritesScreen from './FavoritesScreen';
-
-
+import LoginScreen from './LoginScreen';
 
 import { useDispatch } from 'react-redux';
 import { useEffect } from 'react';
@@ -24,8 +22,6 @@ import { fetchCampsites } from '../features/campsites/campsitesSlice';
 import { fetchPromotions } from '../features/promotions/promotionsSlice';
 import { fetchComments } from '../features/comments/commentsSlice';
 
-
-
 const Drawer = createDrawerNavigator();
 
 const screenOptions = {
@@ -33,10 +29,30 @@ const screenOptions = {
     headerStyle: { backgroundColor: '#5637DD' }
 };
 
-// Home Navigator
+const LoginNavigator = () => {
+    const Stack = createStackNavigator();
+    return (
+        <Stack.Navigator screenOptions={screenOptions}>
+            <Stack.Screen
+                name='Login'
+                component={LoginScreen}
+                options={({ navigation }) => ({
+                    headerLeft: () => (
+                        <Icon
+                            name='sign-in'
+                            type='font-awesome'
+                            iconStyle={styles.stackIcon}
+                            onPress={() => navigation.toggleDrawer()}
+                        />
+                    )
+                })}
+            />
+        </Stack.Navigator>
+    );
+};
+
 const HomeNavigator = () => {
     const Stack = createStackNavigator();
-
     return (
         <Stack.Navigator screenOptions={screenOptions}>
             <Stack.Screen
@@ -58,10 +74,8 @@ const HomeNavigator = () => {
     );
 };
 
-// Directory Navigator
 const DirectoryNavigator = () => {
     const Stack = createStackNavigator();
-
     return (
         <Stack.Navigator
             initialRouteName="Directory"
@@ -93,10 +107,8 @@ const DirectoryNavigator = () => {
     );
 };
 
-// About Navigator
 const AboutNavigator = () => {
     const Stack = createStackNavigator();
-
     return (
         <Stack.Navigator screenOptions={screenOptions}>
             <Stack.Screen
@@ -117,10 +129,8 @@ const AboutNavigator = () => {
     );
 };
 
-// Contact Navigator
 const ContactNavigator = () => {
     const Stack = createStackNavigator();
-
     return (
         <Stack.Navigator screenOptions={screenOptions}>
             <Stack.Screen
@@ -188,8 +198,6 @@ const FavoritesNavigator = () => {
     );
 };
 
-
-
 const CustomDrawerContent = (props) => (
     <DrawerContentScrollView {...props}>
         <View style={styles.drawerHeader}>
@@ -204,30 +212,42 @@ const CustomDrawerContent = (props) => (
     </DrawerContentScrollView>
 );
 
-
-
 const Main = () => {
+    const dispatch = useDispatch();
 
-
-const dispatch = useDispatch();
-
-useEffect(() => {
-    dispatch(fetchCampsites());
-    dispatch(fetchPromotions());
-    dispatch(fetchPartners());
-    dispatch(fetchComments());
-}, [dispatch]);
+    useEffect(() => {
+        dispatch(fetchCampsites());
+        dispatch(fetchPromotions());
+        dispatch(fetchPartners());
+        dispatch(fetchComments());
+    }, [dispatch]);
 
     return (
         <View style={{ flex: 1, paddingTop: Platform.OS === 'ios' ? 0 : Constants.statusBarHeight }}>
             <Drawer.Navigator
                 initialRouteName="HomeNav"
-                drawerContent={CustomDrawerContent} // ✅ Add this line
+                drawerContent={CustomDrawerContent}
                 screenOptions={{
                     drawerStyle: { backgroundColor: '#CEC8FF' },
                     headerShown: true,
                 }}
-                >
+            >
+                <Drawer.Screen
+                    name='Login'
+                    component={LoginNavigator}
+                    options={{
+                        headerShown: false,
+                        drawerIcon: ({ color }) => (
+                            <Icon
+                                name='sign-in'
+                                type='font-awesome'
+                                size={24}
+                                iconStyle={{ width: 24 }}
+                                color={color}
+                            />
+                        )
+                    }}
+                />
                 <Drawer.Screen
                     name="HomeNav"
                     component={HomeNavigator}
@@ -262,7 +282,6 @@ useEffect(() => {
                         )
                     }}
                 />
-
                 <Drawer.Screen
                     name='ReserveCampsite'
                     component={ReservationNavigator}
@@ -279,7 +298,6 @@ useEffect(() => {
                         )
                     }}
                 />
-
                 <Drawer.Screen
                     name='FavoritesNav'
                     component={FavoritesNavigator}
@@ -297,8 +315,6 @@ useEffect(() => {
                         )
                     }}
                 />
-
-
                 <Drawer.Screen
                     name="AboutNav"
                     component={AboutNavigator}
@@ -334,7 +350,6 @@ useEffect(() => {
                     }}
                 />
             </Drawer.Navigator>
-
         </View>
     );
 };
@@ -364,6 +379,5 @@ const styles = StyleSheet.create({
         width: 60
     }
 });
-
 
 export default Main;
