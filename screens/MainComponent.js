@@ -13,7 +13,7 @@ import AboutScreen from './AboutScreen';
 import ContactScreen from './ContactScreen';
 import ReservationScreen from './ReservationScreen';
 import FavoritesScreen from './FavoritesScreen';
-import LoginScreen from './LoginScreen';
+import LoginScreen from './ LoginScreen';
 
 import { useDispatch } from 'react-redux';
 import { useEffect } from 'react';
