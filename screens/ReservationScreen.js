@@ -1,5 +1,5 @@
+
 import { useState } from 'react';
-import * as Animatable from 'react-native-animatable';
 import {
     Text,
     View,
@@ -7,11 +7,11 @@ import {
     StyleSheet,
     Switch,
     Button,
-    Platform,
     Alert
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import * as Animatable from 'react-native-animatable';
 import * as Notifications from 'expo-notifications';
 
 const ReservationScreen = () => {
@@ -20,28 +20,43 @@ const ReservationScreen = () => {
     const [date, setDate] = useState(new Date());
     const [showCalendar, setShowCalendar] = useState(false);
 
+    const onDateChange = (event, selectedDate) => {
+        const currentDate = selectedDate || date;
+        setShowCalendar(Platform.OS === 'ios');
+        setDate(currentDate);
+    };
+
     const handleReservation = () => {
+        const message = `Number of Campers: ${campers}
+                            \nHike-In? ${hikeIn}
+                            \nDate: ${date.toLocaleDateString('en-US')}`;
         Alert.alert(
             'Begin Search?',
-            `Number of Campers: ${campers}
-Hike-In? ${hikeIn ? 'Yes' : 'No'}
-Date: ${date.toLocaleDateString('en-US')}`,
+            message,
             [
                 {
                     text: 'Cancel',
-                    onPress: resetForm,
+                    onPress: () => {
+                        console.log('Reservation Search Canceled');
+                        resetForm();
+                    },
                     style: 'cancel'
                 },
                 {
                     text: 'OK',
                     onPress: () => {
-                        presentLocalNotification(date.toLocaleDateString('en-US'));
+                        presentLocalNotification(
+                            date.toLocaleDateString('en-US')
+                        );
                         resetForm();
                     }
                 }
             ],
             { cancelable: false }
         );
+        console.log('campers:', campers);
+        console.log('hikeIn:', hikeIn);
+        console.log('date:', date);
     };
 
     const resetForm = () => {
@@ -49,12 +64,6 @@ Date: ${date.toLocaleDateString('en-US')}`,
         setHikeIn(false);
         setDate(new Date());
         setShowCalendar(false);
-    };
-
-    const onDateChange = (event, selectedDate) => {
-        const currentDate = selectedDate || date;
-        setShowCalendar(Platform.OS === 'ios');
-        setDate(currentDate);
     };
 
     const presentLocalNotification = async (reservationDate) => {
@@ -80,7 +89,6 @@ Date: ${date.toLocaleDateString('en-US')}`,
         if (!permissions.granted) {
             permissions = await Notifications.requestPermissionsAsync();
         }
-
         if (permissions.granted) {
             sendNotification();
         }
@@ -88,7 +96,7 @@ Date: ${date.toLocaleDateString('en-US')}`,
 
     return (
         <ScrollView>
-            <Animatable.View animation="zoomIn" duration={2000} delay={1000}>
+            <Animatable.View animation='zoomIn' duration={2000} delay={1000}>
                 <View style={styles.formRow}>
                     <Text style={styles.formLabel}>Number of Campers:</Text>
                     <Picker
@@ -104,17 +112,15 @@ Date: ${date.toLocaleDateString('en-US')}`,
                         <Picker.Item label='6' value={6} />
                     </Picker>
                 </View>
-
                 <View style={styles.formRow}>
                     <Text style={styles.formLabel}>Hike In?</Text>
                     <Switch
                         style={styles.formItem}
                         value={hikeIn}
                         trackColor={{ true: '#5637DD', false: null }}
-                        onValueChange={setHikeIn}
+                        onValueChange={(value) => setHikeIn(value)}
                     />
                 </View>
-
                 <View style={styles.formRow}>
                     <Text style={styles.formLabel}>Date:</Text>
                     <Button
@@ -124,7 +130,6 @@ Date: ${date.toLocaleDateString('en-US')}`,
                         accessibilityLabel='Tap me to select a reservation date'
                     />
                 </View>
-
                 {showCalendar && (
                     <DateTimePicker
                         style={styles.formItem}
@@ -134,10 +139,9 @@ Date: ${date.toLocaleDateString('en-US')}`,
                         onChange={onDateChange}
                     />
                 )}
-
                 <View style={styles.formRow}>
                     <Button
-                        onPress={handleReservation}
+                        onPress={() => handleReservation()}
                         title='Search Availability'
                         color='#5637DD'
                         accessibilityLabel='Tap me to search for available campsites to reserve'
