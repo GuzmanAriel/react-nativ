@@ -1,10 +1,10 @@
-
 import { useEffect, useState } from 'react';
 import { View, StyleSheet, ScrollView, Image } from 'react-native';
 import { CheckBox, Input, Button, Icon } from 'react-native-elements';
 import * as SecureStore from 'expo-secure-store';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import * as ImagePicker from 'expo-image-picker';
+import * as ImageManipulator from 'expo-image-manipulator';
 import { baseUrl } from '../shared/baseUrl';
 import logo from '../assets/images/logo.png';
 
@@ -20,10 +20,7 @@ const LoginTab = ({ navigation }) => {
         if (remember) {
             SecureStore.setItemAsync(
                 'userinfo',
-                JSON.stringify({
-                    username,
-                    password
-                })
+                JSON.stringify({ username, password })
             ).catch((error) => console.log('Could not save user info', error));
         } else {
             SecureStore.deleteItemAsync('userinfo').catch((error) =>
@@ -48,7 +45,7 @@ const LoginTab = ({ navigation }) => {
             <Input
                 placeholder='Username'
                 leftIcon={{ type: 'font-awesome', name: 'user-o' }}
-                onChangeText={(text) => setUsername(text)}
+                onChangeText={setUsername}
                 value={username}
                 containerStyle={styles.formInput}
                 leftIconContainerStyle={styles.formIcon}
@@ -56,7 +53,7 @@ const LoginTab = ({ navigation }) => {
             <Input
                 placeholder='Password'
                 leftIcon={{ type: 'font-awesome', name: 'key' }}
-                onChangeText={(text) => setPassword(text)}
+                onChangeText={setPassword}
                 value={password}
                 containerStyle={styles.formInput}
                 leftIconContainerStyle={styles.formIcon}
@@ -70,9 +67,8 @@ const LoginTab = ({ navigation }) => {
             />
             <View style={styles.formButton}>
                 <Button
-                    onPress={() => handleLogin()}
+                    onPress={handleLogin}
                     title='Login'
-                    color='#5637DD'
                     icon={
                         <Icon
                             name='sign-in'
@@ -126,10 +122,7 @@ const RegisterTab = () => {
         if (remember) {
             SecureStore.setItemAsync(
                 'userinfo',
-                JSON.stringify({
-                    username,
-                    password
-                })
+                JSON.stringify({ username, password })
             ).catch((error) => console.log('Could not save user info', error));
         } else {
             SecureStore.deleteItemAsync('userinfo').catch((error) =>
@@ -139,19 +132,41 @@ const RegisterTab = () => {
     };
 
     const getImageFromCamera = async () => {
-        const cameraPermission =
-            await ImagePicker.requestCameraPermissionsAsync();
-
+        const cameraPermission = await ImagePicker.requestCameraPermissionsAsync();
         if (cameraPermission.status === 'granted') {
             const capturedImage = await ImagePicker.launchCameraAsync({
                 allowsEditing: true,
                 aspect: [1, 1]
             });
             if (capturedImage.assets) {
-                console.log(capturedImage.assets[0]);
-                setImageUrl(capturedImage.assets[0].uri);
+                console.log('📷 Camera Image:', capturedImage.assets[0]);
+                await processImage(capturedImage.assets[0].uri);
             }
         }
+    };
+
+    const getImageFromGallery = async () => {
+        const mediaLibraryPermissions = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (mediaLibraryPermissions.status === 'granted') {
+            const capturedImage = await ImagePicker.launchImageLibraryAsync({
+                allowsEditing: true,
+                aspect: [1, 1]
+            });
+            if (capturedImage.assets) {
+                console.log('🖼️ Gallery Image:', capturedImage.assets[0]);
+                await processImage(capturedImage.assets[0].uri);
+            }
+        }
+    };
+
+    const processImage = async (imgUri) => {
+        const processedImage = await ImageManipulator.manipulateAsync(
+            imgUri,
+            [{ resize: { width: 400 } }],
+            { compress: 1, format: ImageManipulator.SaveFormat.PNG }
+        );
+        console.log('📸 Processed Image:', processedImage);
+        setImageUrl(processedImage.uri);
     };
 
     return (
@@ -163,12 +178,16 @@ const RegisterTab = () => {
                         loadingIndicatorSource={logo}
                         style={styles.image}
                     />
-                    <Button title='Camera' onPress={getImageFromCamera} />
+                    <View>
+                        <Button title='Camera' onPress={getImageFromCamera} />
+                        <View style={{ marginTop: 10 }} />
+                        <Button title='Gallery' onPress={getImageFromGallery} />
+                    </View>
                 </View>
                 <Input
                     placeholder='Username'
                     leftIcon={{ type: 'font-awesome', name: 'user-o' }}
-                    onChangeText={(text) => setUsername(text)}
+                    onChangeText={setUsername}
                     value={username}
                     containerStyle={styles.formInput}
                     leftIconContainerStyle={styles.formIcon}
@@ -176,7 +195,7 @@ const RegisterTab = () => {
                 <Input
                     placeholder='Password'
                     leftIcon={{ type: 'font-awesome', name: 'key' }}
-                    onChangeText={(text) => setPassword(text)}
+                    onChangeText={setPassword}
                     value={password}
                     containerStyle={styles.formInput}
                     leftIconContainerStyle={styles.formIcon}
@@ -184,7 +203,7 @@ const RegisterTab = () => {
                 <Input
                     placeholder='First Name'
                     leftIcon={{ type: 'font-awesome', name: 'user-o' }}
-                    onChangeText={(text) => setFirstName(text)}
+                    onChangeText={setFirstName}
                     value={firstName}
                     containerStyle={styles.formInput}
                     leftIconContainerStyle={styles.formIcon}
@@ -192,7 +211,7 @@ const RegisterTab = () => {
                 <Input
                     placeholder='Last Name'
                     leftIcon={{ type: 'font-awesome', name: 'user-o' }}
-                    onChangeText={(text) => setLastName(text)}
+                    onChangeText={setLastName}
                     value={lastName}
                     containerStyle={styles.formInput}
                     leftIconContainerStyle={styles.formIcon}
@@ -200,7 +219,7 @@ const RegisterTab = () => {
                 <Input
                     placeholder='Email'
                     leftIcon={{ type: 'font-awesome', name: 'envelope-o' }}
-                    onChangeText={(text) => setEmail(text)}
+                    onChangeText={setEmail}
                     value={email}
                     containerStyle={styles.formInput}
                     leftIconContainerStyle={styles.formIcon}
@@ -214,9 +233,8 @@ const RegisterTab = () => {
                 />
                 <View style={styles.formButton}>
                     <Button
-                        onPress={() => handleRegister()}
+                        onPress={handleRegister}
                         title='Register'
-                        color='#5637DD'
                         icon={
                             <Icon
                                 name='user-plus'
@@ -250,30 +268,26 @@ const LoginScreen = () => {
                 name='Login'
                 component={LoginTab}
                 options={{
-                    tabBarIcon: (props) => {
-                        return (
-                            <Icon
-                                name='sign-in'
-                                type='font-awesome'
-                                color={props.color}
-                            />
-                        );
-                    }
+                    tabBarIcon: (props) => (
+                        <Icon
+                            name='sign-in'
+                            type='font-awesome'
+                            color={props.color}
+                        />
+                    )
                 }}
             />
             <Tab.Screen
                 name='Register'
                 component={RegisterTab}
                 options={{
-                    tabBarIcon: (props) => {
-                        return (
-                            <Icon
-                                name='user-plus'
-                                type='font-awesome'
-                                color={props.color}
-                            />
-                        );
-                    }
+                    tabBarIcon: (props) => (
+                        <Icon
+                            name='user-plus'
+                            type='font-awesome'
+                            color={props.color}
+                        />
+                    )
                 }}
             />
         </Tab.Navigator>
